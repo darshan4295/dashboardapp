@@ -1,14 +1,8 @@
-import { Utils } from "./utils"
-import { DDManager } from "./dd-manager"
-import { DDElement } from "./dd-element"
-
-// let count = 0; // TEST
-
 /**
  * HTML Native Mouse and Touch Events Drag and Drop functionality.
  */
-export class DDGridStack {
-  resizable(el, opts, key, value) {
+Ext.define('DDGridStack', {
+  resizable: function(el, opts, key, value) {
     this._getDDElements(el, opts).forEach(dEl => {
       if (opts === "disable" || opts === "enable") {
         dEl.ddResizable && dEl.ddResizable[opts]() // can't create DD as it requires options for setupResizable()
@@ -44,9 +38,9 @@ export class DDGridStack {
       }
     })
     return this
-  }
+  },
 
-  draggable(el, opts, key, value) {
+  draggable: function(el, opts, key, value) {
     this._getDDElements(el, opts).forEach(dEl => {
       if (opts === "disable" || opts === "enable") {
         dEl.ddDraggable && dEl.ddDraggable[opts]() // can't create DD as it requires options for setupDraggable()
@@ -68,14 +62,14 @@ export class DDGridStack {
       }
     })
     return this
-  }
+  },
 
-  dragIn(el, opts) {
+  dragIn: function(el, opts) {
     this._getDDElements(el).forEach(dEl => dEl.setupDraggable(opts))
     return this
-  }
+  },
 
-  droppable(el, opts, key, value) {
+  droppable: function(el, opts, key, value) {
     if (typeof opts.accept === "function" && !opts._accept) {
       opts._accept = opts.accept
       opts.accept = el => opts._accept(el)
@@ -92,24 +86,24 @@ export class DDGridStack {
       }
     })
     return this
-  }
+  },
 
   /** true if element is droppable */
-  isDroppable(el) {
+  isDroppable: function(el) {
     return !!(el?.ddElement?.ddDroppable && !el.ddElement.ddDroppable.disabled)
-  }
+  },
 
   /** true if element is draggable */
-  isDraggable(el) {
+  isDraggable: function(el) {
     return !!(el?.ddElement?.ddDraggable && !el.ddElement.ddDraggable.disabled)
-  }
+  },
 
   /** true if element is draggable */
-  isResizable(el) {
+  isResizable: function(el) {
     return !!(el?.ddElement?.ddResizable && !el.ddElement.ddResizable.disabled)
-  }
+  },
 
-  on(el, name, callback) {
+  on: function(el, name, callback) {
     this._getDDElements(el).forEach(dEl =>
       dEl.on(name, event => {
         callback(
@@ -120,15 +114,15 @@ export class DDGridStack {
       })
     )
     return this
-  }
+  },
 
-  off(el, name) {
+  off: function(el, name) {
     this._getDDElements(el).forEach(dEl => dEl.off(name))
     return this
-  }
+  },
 
   /** @internal returns a list of DD elements, creating them on the fly by default unless option is to destroy or disable */
-  _getDDElements(els, opts) {
+  _getDDElements: function(els, opts) {
     // don't force create if we're going to destroy it, unless it's a grid which is used as drop target for it's children
     const create = els.gridstack || (opts !== "destroy" && opts !== "disable")
     const hosts = Utils.getElements(els)
@@ -138,4 +132,4 @@ export class DDGridStack {
       .filter(d => d) // remove nulls
     return list
   }
-}
+});

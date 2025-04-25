@@ -1,30 +1,24 @@
-/**
- * dd-resizable.ts 12.1.0-dev
- * Copyright (c) 2021-2024  Alain Dumesny - see GridStack root license
- */
 
-import { DDResizableHandle } from "./dd-resizable-handle"
-import { DDBaseImplement } from "./dd-base-impl"
-import { Utils } from "./utils"
-import { DDManager } from "./dd-manager"
+Ext.define('DDResizable', {
+extend: 'DDBaseImplement',
+  rectScale : { x: 1, y: 1 },
 
-export class DDResizable extends DDBaseImplement {
-  /** @internal */
-  rectScale = { x: 1, y: 1 }
-  /** @internal */
-  static _originStyleProp = [
-    "width",
-    "height",
-    "position",
-    "left",
-    "top",
-    "opacity",
-    "zIndex"
-  ]
+  statics:{
+    _originStyleProp : [
+        "width",
+        "height",
+        "position",
+        "left",
+        "top",
+        "opacity",
+        "zIndex"
+      ],
+  },
+
 
   // have to be public else complains for HTMLElementExtendOpt ?
-  constructor(el, option = {}) {
-    super()
+  constructor: function(el, option = {}) {
+    DDResizable.callSuper()
     this.el = el
     this.option = option
     // create var event binding so we can easily remove and still look like TS methods (unlike anonymous functions)
@@ -33,36 +27,36 @@ export class DDResizable extends DDBaseImplement {
     this.enable()
     this._setupAutoHide(this.option.autoHide)
     this._setupHandlers()
-  }
+  },
 
-  on(event, callback) {
-    super.on(event, callback)
-  }
+  on: function(event, callback) {
+    DDResizable.superclass.on(event, callback)
+  },
 
-  off(event) {
-    super.off(event)
-  }
+  off: function(event) {
+    DDResizable.superclass.off(event)
+  },
 
-  enable() {
-    super.enable()
+  enable: function() {
+    DDResizable.superclass.enable()
     this.el.classList.remove("ui-resizable-disabled")
     this._setupAutoHide(this.option.autoHide)
-  }
+  },
 
-  disable() {
-    super.disable()
+  disable: function() {
+    DDResizable.superclass.disable()
     this.el.classList.add("ui-resizable-disabled")
     this._setupAutoHide(false)
-  }
+  },
 
-  destroy() {
+  destroy: function() {
     this._removeHandlers()
     this._setupAutoHide(false)
     delete this.el
-    super.destroy()
-  }
+    DDResizable.superclass.destroy()
+  },
 
-  updateOption(opts) {
+  updateOption: function(opts) {
     const updateHandles = opts.handles && opts.handles !== this.option.handles
     const updateAutoHide =
       opts.autoHide && opts.autoHide !== this.option.autoHide
@@ -75,10 +69,10 @@ export class DDResizable extends DDBaseImplement {
       this._setupAutoHide(this.option.autoHide)
     }
     return this
-  }
+  },
 
   /** @internal turns auto hide on/off */
-  _setupAutoHide(auto) {
+  _setupAutoHide: function(auto) {
     if (auto) {
       this.el.classList.add("ui-resizable-autohide")
       // use mouseover and not mouseenter to get better performance and track for nested cases
@@ -93,31 +87,31 @@ export class DDResizable extends DDBaseImplement {
       }
     }
     return this
-  }
+  },
 
   /** @internal */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _mouseOver(e) {
+  _mouseOver: function(e) {
     // console.log(`${count++} pre-enter ${(this.el as GridItemHTMLElement).gridstackNode._id}`)
     // already over a child, ignore. Ideally we just call e.stopPropagation() but see https://github.com/gridstack/gridstack.js/issues/2018
     if (DDManager.overResizeElement || DDManager.dragElement) return
     DDManager.overResizeElement = this
     // console.log(`${count++} enter ${(this.el as GridItemHTMLElement).gridstackNode._id}`)
     this.el.classList.remove("ui-resizable-autohide")
-  }
+  },
 
   /** @internal */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _mouseOut(e) {
+  _mouseOut: function(e) {
     // console.log(`${count++} pre-leave ${(this.el as GridItemHTMLElement).gridstackNode._id}`)
     if (DDManager.overResizeElement !== this) return
     delete DDManager.overResizeElement
     // console.log(`${count++} leave ${(this.el as GridItemHTMLElement).gridstackNode._id}`)
     this.el.classList.add("ui-resizable-autohide")
-  }
+  },
 
   /** @internal */
-  _setupHandlers() {
+  _setupHandlers: function() {
     this.handlers = this.option.handles
       .split(",")
       .map(dir => dir.trim())
@@ -136,10 +130,10 @@ export class DDResizable extends DDBaseImplement {
           })
       )
     return this
-  }
+  },
 
   /** @internal */
-  _resizeStart(event) {
+  _resizeStart: function(event) {
     this.sizeToContent = Utils.shouldSizeToContent(this.el.gridstackNode, true) // strick true only and not number
     this.originalRect = this.el.getBoundingClientRect()
     this.scrollEl = Utils.getScrollElement(this.el)
@@ -155,10 +149,10 @@ export class DDResizable extends DDBaseImplement {
     this.el.classList.add("ui-resizable-resizing")
     this.triggerEvent("resizestart", ev)
     return this
-  }
+  },
 
   /** @internal */
-  _resizing(event, dir) {
+  _resizing: function(event, dir) {
     this.scrolled = this.scrollEl.scrollTop - this.scrollY
     this.temporalRect = this._getChange(event, dir)
     this._applyChange()
@@ -168,10 +162,10 @@ export class DDResizable extends DDBaseImplement {
     }
     this.triggerEvent("resize", ev)
     return this
-  }
+  },
 
   /** @internal */
-  _resizeStop(event) {
+  _resizeStop: function(event) {
     const ev = Utils.initEvent(event, { type: "resizestop", target: this.el })
     // Remove style attr now, so the stop handler can rebuild style attrs
     this._cleanHelper()
@@ -186,10 +180,10 @@ export class DDResizable extends DDBaseImplement {
     delete this.scrollY
     delete this.scrolled
     return this
-  }
+  },
 
   /** @internal */
-  _setupHelper() {
+  _setupHelper: function() {
     this.elOriginStyleVal = DDResizable._originStyleProp.map(
       prop => this.el.style[prop]
     )
@@ -208,20 +202,20 @@ export class DDResizable extends DDBaseImplement {
     this.el.style.position = "absolute"
     this.el.style.opacity = "0.8"
     return this
-  }
+  },
 
   /** @internal */
-  _cleanHelper() {
+  _cleanHelper: function() {
     DDResizable._originStyleProp.forEach((prop, i) => {
       this.el.style[prop] = this.elOriginStyleVal[i] || null
     })
     this.el.parentElement.style.position =
       this.parentOriginStylePosition || null
     return this
-  }
+  },
 
   /** @internal */
-  _getChange(event, dir) {
+  _getChange: function(event, dir) {
     const oEvent = this.startEvent
     const newRect = {
       // Note: originalRect is a complex object, not a simple Rect, so copy out.
@@ -270,10 +264,10 @@ export class DDResizable extends DDBaseImplement {
       newRect.height = constrain.height
     }
     return newRect
-  }
+  },
 
   /** @internal constrain the size to the set min/max values */
-  _constrainSize(oWidth, oHeight, moveLeft, moveUp) {
+  _constrainSize: function(oWidth, oHeight, moveLeft, moveUp) {
     const o = this.option
     const maxWidth =
       (moveLeft ? o.maxWidthMoveLeft : o.maxWidth) || Number.MAX_SAFE_INTEGER
@@ -284,10 +278,10 @@ export class DDResizable extends DDBaseImplement {
     const width = Math.min(maxWidth, Math.max(minWidth, oWidth))
     const height = Math.min(maxHeight, Math.max(minHeight, oHeight))
     return { width, height }
-  }
+  },
 
   /** @internal */
-  _applyChange() {
+  _applyChange: function() {
     let containmentRect = { left: 0, top: 0, width: 0, height: 0 }
     if (this.el.style.position === "absolute") {
       const containmentEl = this.el.parentElement
@@ -307,17 +301,17 @@ export class DDResizable extends DDBaseImplement {
         (value - containmentRect[key]) * scaleReciprocal + "px"
     })
     return this
-  }
+  },
 
   /** @internal */
-  _removeHandlers() {
+  _removeHandlers: function() {
     this.handlers.forEach(handle => handle.destroy())
     delete this.handlers
     return this
-  }
+  },
 
   /** @internal */
-  _ui = () => {
+  _ui : function (){
     const containmentEl = this.el.parentElement
     const containmentRect = containmentEl.getBoundingClientRect()
     const newRect = {
@@ -352,4 +346,4 @@ export class DDResizable extends DDBaseImplement {
       */
     }
   }
-}
+});

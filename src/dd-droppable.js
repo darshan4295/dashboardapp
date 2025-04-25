@@ -1,13 +1,8 @@
-import { DDManager } from "./dd-manager"
-import { DDBaseImplement } from "./dd-base-impl"
-import { Utils } from "./utils"
-import { isTouch, pointerenter, pointerleave } from "./dd-touch"
+Ext.define('DDDroppable', {
+    extend: 'DDBaseImplement',
 
-// let count = 0; // TEST
-
-export class DDDroppable extends DDBaseImplement {
-  constructor(el, option = {}) {
-    super()
+  constructor: function(el, option = {}) {
+    DDDroppable.callSuper()
     this.el = el
     this.option = option
     // create var event binding so we can easily remove and still look like TS methods (unlike anonymous functions)
@@ -15,19 +10,19 @@ export class DDDroppable extends DDBaseImplement {
     this._mouseLeave = this._mouseLeave.bind(this)
     this.enable()
     this._setupAccept()
-  }
+  },
 
-  on(event, callback) {
-    super.on(event, callback)
-  }
+  on: function(event, callback) {
+    DDDroppable.superclass.on(event, callback)
+  },
 
-  off(event) {
-    super.off(event)
-  }
+  off: function(event) {
+    DDDroppable.superclass.off(event)
+  },
 
-  enable() {
+  enable: function() {
     if (this.disabled === false) return
-    super.enable()
+    DDDroppable.superclass.enable()
     this.el.classList.add("ui-droppable")
     this.el.classList.remove("ui-droppable-disabled")
     this.el.addEventListener("mouseenter", this._mouseEnter)
@@ -36,11 +31,11 @@ export class DDDroppable extends DDBaseImplement {
       this.el.addEventListener("pointerenter", pointerenter)
       this.el.addEventListener("pointerleave", pointerleave)
     }
-  }
+  },
 
-  disable(forDestroy = false) {
+  disable: function(forDestroy = false) {
     if (this.disabled === true) return
-    super.disable()
+    DDDroppable.superclass.disable()
     this.el.classList.remove("ui-droppable")
     if (!forDestroy) this.el.classList.add("ui-droppable-disabled")
     this.el.removeEventListener("mouseenter", this._mouseEnter)
@@ -49,23 +44,23 @@ export class DDDroppable extends DDBaseImplement {
       this.el.removeEventListener("pointerenter", pointerenter)
       this.el.removeEventListener("pointerleave", pointerleave)
     }
-  }
+  },
 
-  destroy() {
+  destroy: function() {
     this.disable(true)
     this.el.classList.remove("ui-droppable")
     this.el.classList.remove("ui-droppable-disabled")
-    super.destroy()
-  }
+    DDDroppable.superclass.destroy()
+  },
 
-  updateOption(opts) {
+  updateOption: function(opts) {
     Object.keys(opts).forEach(key => (this.option[key] = opts[key]))
     this._setupAccept()
     return this
-  }
+  },
 
   /** @internal called when the cursor enters our area - prepare for a possible drop and track leaving */
-  _mouseEnter(e) {
+  _mouseEnter: function(e) {
     // console.log(`${count++} Enter ${this.el.id || (this.el as GridHTMLElement).gridstack.opts.id}`); // TEST
     if (!DDManager.dragElement) return
     if (!this._canDrop(DDManager.dragElement.el)) return
@@ -85,10 +80,10 @@ export class DDDroppable extends DDBaseImplement {
     this.triggerEvent("dropover", ev)
     this.el.classList.add("ui-droppable-over")
     // console.log('tracking'); // TEST
-  }
+  },
 
   /** @internal called when the item is leaving our area, stop tracking if we had moving item */
-  _mouseLeave(e, calledByEnter = false) {
+  _mouseLeave: function(e, calledByEnter = false) {
     // console.log(`${count++} Leave ${this.el.id || (this.el as GridHTMLElement).gridstack.opts.id}`); // TEST
     if (!DDManager.dragElement || DDManager.dropElement !== this) return
     e.preventDefault()
@@ -117,25 +112,25 @@ export class DDDroppable extends DDBaseImplement {
         }
       }
     }
-  }
+  },
 
   /** item is being dropped on us - called by the drag mouseup handler - this calls the client drop event */
-  drop(e) {
+  drop: function(e) {
     e.preventDefault()
     const ev = Utils.initEvent(e, { target: this.el, type: "drop" })
     if (this.option.drop) {
       this.option.drop(ev, this._ui(DDManager.dragElement))
     }
     this.triggerEvent("drop", ev)
-  }
+  },
 
   /** @internal true if element matches the string/method accept option */
-  _canDrop(el) {
+  _canDrop: function(el) {
     return el && (!this.accept || this.accept(el))
-  }
+  },
 
   /** @internal */
-  _setupAccept() {
+  _setupAccept: function() {
     if (!this.option.accept) return this
     if (typeof this.option.accept === "string") {
       this.accept = el =>
@@ -145,13 +140,13 @@ export class DDDroppable extends DDBaseImplement {
       this.accept = this.option.accept
     }
     return this
-  }
+  },
 
   /** @internal */
-  _ui(drag) {
+  _ui: function(drag) {
     return {
       draggable: drag.el,
       ...drag.ui()
     }
   }
-}
+});

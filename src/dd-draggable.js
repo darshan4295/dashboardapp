@@ -1,50 +1,36 @@
-/**
- * dd-draggable.ts 12.1.0-dev
- * Copyright (c) 2021-2024  Alain Dumesny - see GridStack root license
- */
-
-import { DDManager } from "./dd-manager"
-import { Utils } from "./utils"
-import { DDBaseImplement } from "./dd-base-impl"
-import {
-  isTouch,
-  touchend,
-  touchmove,
-  touchstart,
-  pointerdown
-} from "./dd-touch"
-
-// make sure we are not clicking on known object that handles mouseDown
-const skipMouseDown =
+var skipMouseDown =
   'input,textarea,button,select,option,[contenteditable="true"],.ui-resizable-handle'
 
 // let count = 0; // TEST
 
-export class DDDraggable extends DDBaseImplement {
-  /** @internal properties we change during dragging, and restore back */
-  static originStyleProp = [
-    "width",
-    "height",
-    "transform",
-    "transform-origin",
-    "transition",
-    "pointerEvents",
-    "position",
-    "left",
-    "top",
-    "minWidth",
-    "willChange"
-  ]
+Ext.define('DDDraggable', {
+    extend: 'DDBaseImplement',
+
+    statics:{
+        originStyleProp : [
+            "width",
+            "height",
+            "transform",
+            "transform-origin",
+            "transition",
+            "pointerEvents",
+            "position",
+            "left",
+            "top",
+            "minWidth",
+            "willChange"
+          ]
+    },
   /** @internal */
-  dragTransform = {
+  dragTransform : {
     xScale: 1,
     yScale: 1,
     xOffset: 0,
     yOffset: 0
-  }
+  },
 
-  constructor(el, option = {}) {
-    super()
+  constructor: function(el, option = {}) {
+    this.callParent()
 
     this.el = el
     this.option = option
@@ -67,19 +53,19 @@ export class DDDraggable extends DDBaseImplement {
     this._mouseUp = this._mouseUp.bind(this)
     this._keyEvent = this._keyEvent.bind(this)
     this.enable()
-  }
+  },
 
-  on(event, callback) {
-    super.on(event, callback)
-  }
+  on: function(event, callback) {
+    DDDraggable.superclass.on(event, callback)
+  },
 
-  off(event) {
-    super.off(event)
-  }
+  off: function(event) {
+    DDDraggable.superclass.off(event)
+  },
 
-  enable() {
+  enable: function() {
     if (this.disabled === false) return
-    super.enable()
+    DDDraggable.superclass.enable()
     this.dragEls.forEach(dragEl => {
       dragEl.addEventListener("mousedown", this._mouseDown)
       if (isTouch) {
@@ -89,11 +75,11 @@ export class DDDraggable extends DDBaseImplement {
       }
     })
     this.el.classList.remove("ui-draggable-disabled")
-  }
+  },
 
-  disable(forDestroy = false) {
+  disable: function(forDestroy = false) {
     if (this.disabled === true) return
-    super.disable()
+    DDDraggable.superclass.disable()
     this.dragEls.forEach(dragEl => {
       dragEl.removeEventListener("mousedown", this._mouseDown)
       if (isTouch) {
@@ -102,9 +88,9 @@ export class DDDraggable extends DDBaseImplement {
       }
     })
     if (!forDestroy) this.el.classList.add("ui-draggable-disabled")
-  }
+  },
 
-  destroy() {
+  destroy: function() {
     if (this.dragTimeout) window.clearTimeout(this.dragTimeout)
     delete this.dragTimeout
     if (this.mouseDownEvent) this._mouseUp(this.mouseDownEvent)
@@ -112,16 +98,16 @@ export class DDDraggable extends DDBaseImplement {
     delete this.el
     delete this.helper
     delete this.option
-    super.destroy()
-  }
+    DDDraggable.superclass.destroy()
+  },
 
-  updateOption(opts) {
+  updateOption: function(opts) {
     Object.keys(opts).forEach(key => (this.option[key] = opts[key]))
     return this
-  }
+  },
 
   /** @internal call when mouse goes down before a dragstart happens */
-  _mouseDown(e) {
+  _mouseDown: function(e) {
     // don't let more than one widget handle mouseStart
     if (DDManager.mouseHandled) return
     if (e.button !== 0) return true // only left click
@@ -158,20 +144,20 @@ export class DDDraggable extends DDBaseImplement {
 
     DDManager.mouseHandled = true
     return true
-  }
+  },
 
   /** @internal method to call actual drag event */
-  _callDrag(e) {
+  _callDrag: function(e) {
     if (!this.dragging) return
     const ev = Utils.initEvent(e, { target: this.el, type: "drag" })
     if (this.option.drag) {
       this.option.drag(ev, this.ui())
     }
     this.triggerEvent("drag", ev)
-  }
+  },
 
   /** @internal called when the main page (after successful mousedown) receives a move event to drag the item around the screen */
-  _mouseMove(e) {
+  _mouseMove: function(e) {
     // console.log(`${count++} move ${e.x},${e.y}`)
     const s = this.mouseDownEvent
     this.lastDrag = e
@@ -219,10 +205,10 @@ export class DDDraggable extends DDBaseImplement {
     }
     // e.preventDefault(); // passive = true. OLD: was needed otherwise we get text sweep text selection as we drag around
     return true
-  }
+  },
 
   /** @internal call when the mouse gets released to drop the item at current location */
-  _mouseUp(e) {
+  _mouseUp: function(e) {
     document.removeEventListener("mousemove", this._mouseMove, true)
     document.removeEventListener("mouseup", this._mouseUp, true)
     if (isTouch && e.currentTarget) {
@@ -262,10 +248,10 @@ export class DDDraggable extends DDBaseImplement {
     delete DDManager.dropElement
     delete DDManager.mouseHandled
     e.preventDefault()
-  }
+  },
 
   /** @internal call when keys are being pressed - use Esc to cancel, R to rotate */
-  _keyEvent(e) {
+  _keyEvent: function(e) {
     const n = this.el.gridstackNode
     const grid = n?.grid || DDManager.dropElement?.el?.gridstack
 
@@ -299,10 +285,10 @@ export class DDDraggable extends DDBaseImplement {
       delete n._rect
       this._mouseMove(this.lastDrag)
     }
-  }
+  },
 
   /** @internal create a clone copy (or user defined method) of the original drag item if set */
-  _createHelper() {
+  _createHelper: function() {
     let helper = this.el
     if (typeof this.option.helper === "function") {
       helper = this.option.helper(this.el)
@@ -321,10 +307,10 @@ export class DDDraggable extends DDBaseImplement {
       prop => this.el.style[prop]
     )
     return helper
-  }
+  },
 
   /** @internal set the fix position of the dragged item */
-  _setupHelperStyle(e) {
+  _setupHelperStyle: function(e) {
     this.helper.classList.add("ui-draggable-dragging")
     // TODO: set all at once with style.cssText += ... ? https://stackoverflow.com/questions/3968593
     const style = this.helper.style
@@ -342,10 +328,10 @@ export class DDDraggable extends DDBaseImplement {
       }
     }, 0)
     return this
-  }
+  },
 
   /** @internal restore back the original style before dragging */
-  _removeHelperStyle() {
+  _removeHelperStyle: function() {
     this.helper.classList.remove("ui-draggable-dragging")
     const node = this.helper?.gridstackNode
     // don't bother restoring styles if we're gonna remove anyway...
@@ -366,10 +352,10 @@ export class DDDraggable extends DDBaseImplement {
     }
     delete this.dragElementOriginStyle
     return this
-  }
+  },
 
   /** @internal updates the top/left position to follow the mouse */
-  _dragFollow(e) {
+  _dragFollow: function(e) {
     const containmentRect = { left: 0, top: 0 }
     // if (this.helper.style.position === 'absolute') { // we use 'fixed'
     //   const { left, top } = this.helperContainment.getBoundingClientRect();
@@ -385,10 +371,10 @@ export class DDDraggable extends DDBaseImplement {
       (e.clientY + offset.offsetTop - containmentRect.top) *
         this.dragTransform.yScale +
       "px"
-  }
+  },
 
   /** @internal */
-  _setupHelperContainmentStyle() {
+  _setupHelperContainmentStyle: function() {
     this.helperContainment = this.helper.parentElement
     if (this.helper.style.position !== "fixed") {
       this.parentOriginStylePosition = this.helperContainment.style.position
@@ -397,10 +383,10 @@ export class DDDraggable extends DDBaseImplement {
       }
     }
     return this
-  }
+  },
 
   /** @internal */
-  _getDragOffset(event, el, parent) {
+  _getDragOffset: function(event, el, parent) {
     // in case ancestor has transform/perspective css properties that change the viewpoint
     let xformOffsetX = 0
     let xformOffsetY = 0
@@ -418,10 +404,10 @@ export class DDDraggable extends DDBaseImplement {
       width: targetOffset.width * this.dragTransform.xScale,
       height: targetOffset.height * this.dragTransform.yScale
     }
-  }
+  },
 
   /** @internal TODO: set to public as called by DDDroppable! */
-  ui() {
+  ui: function() {
     const containmentEl = this.el.parentElement
     const containmentRect = containmentEl.getBoundingClientRect()
     const offset = this.helper.getBoundingClientRect()
@@ -437,4 +423,4 @@ export class DDDraggable extends DDBaseImplement {
       */
     }
   }
-}
+});

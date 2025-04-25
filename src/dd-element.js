@@ -2,24 +2,22 @@
  * dd-elements.ts 12.1.0-dev
  * Copyright (c) 2021-2024 Alain Dumesny - see GridStack root license
  */
-
-import { DDResizable } from "./dd-resizable"
-import { DDDraggable } from "./dd-draggable"
-import { DDDroppable } from "./dd-droppable"
-
-export class DDElement {
-  static init(el) {
-    if (!el.ddElement) {
-      el.ddElement = new DDElement(el)
-    }
-    return el.ddElement
-  }
-
-  constructor(el) {
+Ext.define('DDElement', {
+    statics:{
+        init: function(el) {
+            if (!el.ddElement) {
+                el.ddElement = new DDElement(el)
+            }
+            return el.ddElement;
+      }
+    },
+    
+  
+  constructor: function(el) {
     this.el = el
-  }
+  },
 
-  on(eventName, callback) {
+  on: function(eventName, callback) {
     if (
       this.ddDraggable &&
       ["drag", "dragstart", "dragstop"].indexOf(eventName) > -1
@@ -37,9 +35,9 @@ export class DDElement {
       this.ddResizable.on(eventName, callback)
     }
     return this
-  }
+  },
 
-  off(eventName) {
+  off: function(eventName) {
     if (
       this.ddDraggable &&
       ["drag", "dragstart", "dragstop"].indexOf(eventName) > -1
@@ -57,56 +55,56 @@ export class DDElement {
       this.ddResizable.off(eventName)
     }
     return this
-  }
+  },
 
-  setupDraggable(opts) {
+  setupDraggable: function(opts) {
     if (!this.ddDraggable) {
       this.ddDraggable = new DDDraggable(this.el, opts)
     } else {
       this.ddDraggable.updateOption(opts)
     }
     return this
-  }
+  },
 
-  cleanDraggable() {
+  cleanDraggable: function() {
     if (this.ddDraggable) {
       this.ddDraggable.destroy()
       delete this.ddDraggable
     }
     return this
-  }
+  },
 
-  setupResizable(opts) {
+  setupResizable: function(opts) {
     if (!this.ddResizable) {
       this.ddResizable = new DDResizable(this.el, opts)
     } else {
       this.ddResizable.updateOption(opts)
     }
     return this
-  }
+  },
 
-  cleanResizable() {
+  cleanResizable: function() {
     if (this.ddResizable) {
       this.ddResizable.destroy()
       delete this.ddResizable
     }
     return this
-  }
+  },
 
-  setupDroppable(opts) {
+  setupDroppable: function(opts) {
     if (!this.ddDroppable) {
       this.ddDroppable = new DDDroppable(this.el, opts)
     } else {
       this.ddDroppable.updateOption(opts)
     }
     return this
-  }
+  },
 
-  cleanDroppable() {
+  cleanDroppable: function() {
     if (this.ddDroppable) {
       this.ddDroppable.destroy()
       delete this.ddDroppable
     }
     return this
   }
-}
+});

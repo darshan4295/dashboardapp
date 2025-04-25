@@ -1,23 +1,13 @@
-/**
- * dd-resizable-handle.ts 12.1.0-dev
- * Copyright (c) 2021-2024  Alain Dumesny - see GridStack root license
- */
-
-import {
-  isTouch,
-  pointerdown,
-  touchend,
-  touchmove,
-  touchstart
-} from "./dd-touch"
-
-export class DDResizableHandle {
+Ext.define('DDResizableHandle', {
   /** @internal true after we've moved enough pixels to start a resize */
-  moving = false
+  moving : false,
   /** @internal */
-  static prefix = "ui-resizable-"
+  
+  statics:{
+    prefix : "ui-resizable-"
+  },
 
-  constructor(host, dir, option) {
+  constructor: function(host, dir, option) {
     this.host = host
     this.dir = dir
     this.option = option
@@ -28,10 +18,10 @@ export class DDResizableHandle {
     this._keyEvent = this._keyEvent.bind(this)
 
     this._init()
-  }
+  },
 
   /** @internal */
-  _init() {
+  _init: function() {
     const el = (this.el = document.createElement("div"))
     el.classList.add("ui-resizable-handle")
     el.classList.add(`${DDResizableHandle.prefix}${this.dir}`)
@@ -45,10 +35,10 @@ export class DDResizableHandle {
       // this.el.style.touchAction = 'none'; // not needed unlike pointerdown doc comment
     }
     return this
-  }
+  },
 
   /** call this when resize handle needs to be removed and cleaned up */
-  destroy() {
+  destroy: function() {
     if (this.moving) this._mouseUp(this.mouseDownEvent)
     this.el.removeEventListener("mousedown", this._mouseDown)
     if (isTouch) {
@@ -59,10 +49,10 @@ export class DDResizableHandle {
     delete this.el
     delete this.host
     return this
-  }
+  },
 
   /** @internal called on mouse down on us: capture move on the entire document (mouse might not stay on us) until we release the mouse */
-  _mouseDown(e) {
+  _mouseDown: function(e) {
     this.mouseDownEvent = e
     document.addEventListener("mousemove", this._mouseMove, {
       capture: true,
@@ -75,10 +65,10 @@ export class DDResizableHandle {
     }
     e.stopPropagation()
     e.preventDefault()
-  }
+  },
 
   /** @internal */
-  _mouseMove(e) {
+  _mouseMove: function(e) {
     const s = this.mouseDownEvent
     if (this.moving) {
       this._triggerEvent("move", e)
@@ -92,10 +82,10 @@ export class DDResizableHandle {
     }
     e.stopPropagation()
     // e.preventDefault(); passive = true
-  }
+  },
 
   /** @internal */
-  _mouseUp(e) {
+  _mouseUp: function(e) {
     if (this.moving) {
       this._triggerEvent("stop", e)
       document.removeEventListener("keydown", this._keyEvent)
@@ -110,19 +100,19 @@ export class DDResizableHandle {
     delete this.mouseDownEvent
     e.stopPropagation()
     e.preventDefault()
-  }
+  },
 
   /** @internal call when keys are being pressed - use Esc to cancel */
-  _keyEvent(e) {
+  _keyEvent: function(e) {
     if (e.key === "Escape") {
       this.host.gridstackNode?.grid?.engine.restoreInitial()
       this._mouseUp(this.mouseDownEvent)
     }
-  }
+  },
 
   /** @internal */
-  _triggerEvent(name, event) {
+  _triggerEvent: function(name, event) {
     if (this.option[name]) this.option[name](event)
     return this
   }
-}
+});
